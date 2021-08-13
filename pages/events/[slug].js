@@ -7,23 +7,11 @@ import { useRouter } from "next/router";
 
 function SingleEvent({ evt }) {
   const router = useRouter();
-  const deleteEvent = async (e) => {
-    if (confirm(`Are you sure to delete ${evt.name} ?`)) {
-      const data = await fetch(`${API_URL}/events/${evt.id}`, {
-        method: "DELETE",
-      });
-      const json = await data.json();
-      if (!data.ok) {
-        console.log("Something went wrong!:" + json.message);
-      } else {
-        router.push("/events/");
-      }
-    }
-  };
+
   return (
     <Layout>
       <div className={styles.event}>
-        <div className={styles.controls}>
+        {/* <div className={styles.controls}>
           <Link href={`/events/edit/${evt.id}`}>
             <a>Edit</a>
           </Link>
@@ -32,7 +20,7 @@ function SingleEvent({ evt }) {
               Delete
             </a>
           </Link>
-        </div>
+        </div> */}
         <span>
           {new Date(evt.date).toLocaleDateString("vi")} at {evt.time}
         </span>

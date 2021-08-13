@@ -6,7 +6,19 @@ import Link from "next/link";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API_URL } from "@/config/index";
-function AddPage() {
+import parseCookie from "@/helpers/index";
+
+// You should use getServerSideProps when:
+// - Only if you need to pre-render a page whose data must be fetched at request time
+export const getServerSideProps = async ({ req }) => {
+  const { token } = parseCookie(req);
+
+  return {
+    props: { token },
+  };
+};
+
+function AddPage({ token }) {
   const [isSubmit, setIsSubmit] = useState(false);
   const [values, setValues] = useState({
     name: "",
@@ -24,7 +36,7 @@ function AddPage() {
     e.preventDefault();
     const hasEmptyFields = Object.values(values).some((el) => el === "");
     setIsSubmit(true);
-    console.log(values);
+    // console.log(values);
     {
       hasEmptyFields && notify();
     }
@@ -32,10 +44,15 @@ function AddPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(values),
     });
     if (!res.ok) {
+      if (res.status === 403) {
+        toast.error("Token not included!");
+        return;
+      }
       toast.error("Something went wrong!");
     } else {
       const evt = await res.json();

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import styles from "../styles/Header.module.css";
 import Search from "./Search";
+import { AuthContext } from "@/context/AuthContext";
+import { useContext } from "react";
 function Header() {
+  const { user, error, register, login, logout } = useContext(AuthContext);
+
   return (
     <header className={styles.header}>
       <div className={styles.logo}>
@@ -17,11 +21,31 @@ function Header() {
               <a>Events</a>
             </Link>
           </li>
-          <li>
-            <Link href="/events/add">
-              <a>Add event</a>
-            </Link>
-          </li>
+          {user ? (
+            <>
+              <li>
+                <Link href="/events/add">
+                  <a>Add event</a>
+                </Link>
+              </li>
+              <li>
+                <Link href="/account/dashboard">
+                  <a>Dashboard</a>
+                </Link>
+              </li>
+              <li>
+                <button className="btn-secondary" onClick={() => logout()}>
+                  Logout
+                </button>
+              </li>
+            </>
+          ) : (
+            <li>
+              <Link href="/account/login">
+                <a>Login</a>
+              </Link>
+            </li>
+          )}
         </ul>
       </nav>
     </header>

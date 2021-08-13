@@ -9,7 +9,9 @@ import Image from "next/image";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { API_URL } from "@/config/index";
-function EditPage({ evt }) {
+import parseCookie from "@/helpers/index";
+
+function EditPage({ evt, token }) {
   const {
     id,
     name,
@@ -50,11 +52,14 @@ function EditPage({ evt }) {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(values),
     });
     if (!res.ok) {
-      toast.error("Something went wrong!");
+      res.status === 403
+        ? toast.error("Not allowed!")
+        : toast.error("Something went wrong!");
     } else {
       const evt = await res.json();
       router.push(`/events/${evt.slug}`);
@@ -177,19 +182,24 @@ function EditPage({ evt }) {
         show={showModal}
         onClose={() => setShowModal(false)}
       >
-        <ImageUpload eventId={values.id} imageUploaded={imageUploaded} />
+        <ImageUpload
+          eventId={values.id}
+          token={token}
+          imageUploaded={imageUploaded}
+        />
       </Modal>
     </Layout>
   );
 }
 // You should use getServerSideProps when:
 // - Only if you need to pre-render a page whose data must be fetched at request time
-export const getServerSideProps = async ({ query: { id } }) => {
+export const getServerSideProps = async ({ query: { id }, req }) => {
+  const { token } = parseCookie(req);
   const data = await fetch(`${API_URL}/events/?id=${id}`);
   const evt = await data.json();
 
   return {
-    props: { evt },
+    props: { evt, token },
   };
 };
 export default EditPage;
